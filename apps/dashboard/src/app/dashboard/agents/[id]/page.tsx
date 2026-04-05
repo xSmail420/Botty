@@ -134,7 +134,7 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
                     <h3 className="text-lg font-bold text-gray-900 mb-4">System prompt</h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 underline">Type {{ to add variables</span>
+                        <span className="text-sm text-gray-600 underline">Type {'{{'} to add variables</span>
                       </div>
                       <Textarea 
                         defaultValue="#Personality&#10;You are Sam, the front desk receptionist at a mid-size company..."
