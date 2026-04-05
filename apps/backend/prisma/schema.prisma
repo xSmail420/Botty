@@ -1,0 +1,78 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id        String       @id @default(uuid())
+  name      String
+  domain    String       @unique
+  stripeId  String?      @unique
+  providers AIProvider[]
+  agents    Agent[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model AIProvider {
+  id        String   @id @default(uuid())
+  type      String   // openai, anthropic, google, openrouter, ollama
+  name      String
+  apiKey    String?
+  baseUrl   String?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, type])
+}
+
+model Agent {
+  id             String          @id @default(uuid())
+  name           String
+  persona        String          @db.Text
+  avatar         String?
+  model          String          @default("gpt-4o")
+  tenantId       String
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  knowledgeBases KnowledgeBase[]
+  messages       Message[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model KnowledgeBase {
+  id        String     @id @default(uuid())
+  name      String
+  agentId   String
+  agent     Agent      @relation(fields: [agentId], references: [id])
+  documents Document[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Document {
+  id              String        @id @default(uuid())
+  title           String
+  sourceUrl       String?
+  content         String?       @db.Text
+  hash            String        @unique // For deduplication
+  knowledgeBaseId String
+  knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  role      String   // 'user' | 'assistant' | 'system'
+  content   String   @db.Text
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id])
+  sessionId String
+  createdAt DateTime @default(now())
+}
