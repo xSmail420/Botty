@@ -1,144 +1,107 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { 
-  FileText, 
-  Upload, 
-  Search, 
-  MoreVertical, 
-  Database,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Plus
-} from "lucide-react";
+import { useState } from 'react';
+import { Database, Plus, Upload, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
-interface Document {
-  id: string;
-  name: string;
-  type: string;
-  status: 'indexed' | 'processing' | 'failed';
-  tokens: string;
-}
-
-export default function KnowledgePage() {
-  const [docs, setDocs] = useState<Document[]>([
+export default function KnowledgeBasePage() {
+  const [docs] = useState([
     { id: '1', name: 'Company_Handbook.pdf', type: 'PDF', status: 'indexed', tokens: '45.2k' },
     { id: '2', name: 'Product_Catalog_2026.csv', type: 'CSV', status: 'indexed', tokens: '128.9k' },
     { id: '3', name: 'Q4_Support_Logs.txt', type: 'TXT', status: 'processing', tokens: '12.4k' },
   ]);
 
   return (
-    <div className="space-y-8 max-w-7xl">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Knowledge Base</h1>
-          <p className="text-muted-foreground">Manage the unstructured data that fuels your agents' retrieval-augmented generation (RAG).</p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="font-bold gap-2">
-            <Upload size={16} /> Bulk Upload
-          </Button>
-          <Button className="font-bold gap-2">
-            <Plus size={16} /> Add Document
-          </Button>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-gray-200 sticky top-0 z-40 bg-white">
+        <div className="px-8 py-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Knowledge Base</h1>
+            <p className="text-gray-600 mt-1">Manage documents and knowledge sources for your agents</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 gap-2">
+              <Upload size={18} /> Bulk Upload
+            </Button>
+            <Button className="bg-black text-white hover:bg-gray-900 gap-2">
+              <Plus size={18} /> Add Document
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-         {[
-           { label: 'Total Tokens', value: '186.5k', icon: Database },
-           { label: 'Documents', value: '12', icon: FileText },
-           { label: 'Sync Status', value: 'All Clear', icon: CheckCircle2 },
-           { label: 'Storage Used', value: '4.2 MB', icon: Clock },
-         ].map((stat, i) => (
-           <Card key={i} className="border-none shadow-sm bg-card">
-              <CardContent className="p-4 flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    <stat.icon size={20} />
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">{stat.label}</p>
-                    <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                 </div>
-              </CardContent>
-           </Card>
-         ))}
-      </div>
-
-      <Card className="border-none shadow-md bg-card overflow-hidden">
-        <CardHeader className="bg-muted/30 pb-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-              <Input placeholder="Search documents..." className="pl-10 bg-background border-border/50" />
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          {[
+            { label: 'Total Tokens', value: '186.5k' },
+            { label: 'Documents', value: '12' },
+            { label: 'Sync Status', value: 'All Clear' },
+            { label: 'Storage Used', value: '4.2 MB' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+              <p className="text-xs text-gray-600 font-bold uppercase tracking-widest">{stat.label}</p>
+              <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
             </div>
-            <Button variant="outline" size="sm">Filter</Button>
+          ))}
+        </div>
+
+        {/* Documents Table */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="bg-gray-50 border-b border-gray-200 p-4 flex gap-4">
+            <div className="flex-1 relative">
+              <Input
+                placeholder="Search documents..."
+                className="border-gray-300 bg-white text-gray-900 pl-10"
+              />
+            </div>
+            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+              Filter
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-border/50 text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
-                  <th className="px-6 py-4">Document Name</th>
-                  <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Tokens</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+
+          <table className="w-full">
+            <thead className="bg-white border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-widest">Document Name</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-widest">Type</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-widest">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {docs.map((doc) => (
+                <tr key={doc.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-600">
+                      <FileText size={16} />
+                    </div>
+                    <span className="font-medium text-gray-900">{doc.name}</span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    <span className="px-2 py-1 bg-gray-100 rounded text-xs font-bold text-gray-700">{doc.type}</span>
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-bold ${
+                        doc.status === 'indexed'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {doc.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900">{doc.tokens}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {docs.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-muted/20 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-muted rounded flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                          <FileText size={16} />
-                        </div>
-                        <span className="text-sm font-semibold text-foreground">{doc.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className="text-[10px] bg-muted/30 border-border/50">{doc.type}</Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                         {doc.status === 'indexed' ? (
-                           <CheckCircle2 size={14} className="text-green-500" />
-                         ) : doc.status === 'processing' ? (
-                           <Clock size={14} className="text-yellow-500 animate-spin-slow" />
-                         ) : (
-                           <AlertCircle size={14} className="text-destructive" />
-                         )}
-                         <span className="text-xs font-medium capitalize text-muted-foreground">{doc.status}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-bold text-foreground">{doc.tokens}</span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted text-muted-foreground"><MoreVertical size={16} /></Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-        <CardFooter className="bg-muted/10 py-3 px-6 flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase">
-          <span>Displaying {docs.length} of 12 documents</span>
-          <div className="flex gap-2">
-             <Button variant="outline" size="sm" disabled className="h-7 text-[10px] px-3 font-bold bg-muted/50">Previous</Button>
-             <Button variant="outline" size="sm" className="h-7 text-[10px] px-3 font-bold hover:bg-background">Next</Button>
-          </div>
-        </CardFooter>
-      </Card>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
