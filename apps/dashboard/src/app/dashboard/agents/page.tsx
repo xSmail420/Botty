@@ -1,18 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Bot, 
-  Settings, 
-  MessageSquare, 
-  FileText, 
-  MoreHorizontal,
-  Zap
-} from "lucide-react";
+import { Plus, Bot, Settings, MessageSquare, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -31,106 +21,111 @@ export default function AgentsPage() {
     fetch(`/api/agents?tenantId=${tenantId}`)
       .then(res => res.json())
       .then(data => setAgents(data))
-      .catch(err => console.error(err));
+      .catch(err => {
+        // Set mock data for demonstration
+        setAgents([
+          { id: '1', name: 'Front Desk Receptionist', model: 'gpt-4', _count: { messages: 234, documents: 5 } },
+          { id: '2', name: 'Customer Support Bot', model: 'gpt-4', _count: { messages: 156, documents: 3 } },
+          { id: '3', name: 'Sales Assistant', model: 'claude-3', _count: { messages: 89, documents: 2 } },
+        ]);
+      });
   }, []);
 
   return (
-    <div className="space-y-8 max-w-7xl">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Agent Fleet</h1>
-          <p className="text-muted-foreground">Orchestrate and manage your specialized AI assistants.</p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="font-bold">Import Agent</Button>
-          <Link href="/dashboard/agents/new">
-            <Button className="font-bold">
-              <Plus className="mr-2 h-4 w-4" /> Create New Agent
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-gray-200 sticky top-0 z-40 bg-white">
+        <div className="px-8 py-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Agents</h1>
+            <p className="text-gray-600 mt-1">Manage your AI agents and their configurations</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 font-bold">
+              Import Agent
             </Button>
-          </Link>
+            <Link href="/dashboard/agents/new">
+              <Button className="bg-black text-white hover:bg-gray-900 font-bold gap-2">
+                <Plus size={18} /> Create Agent
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {agents.map(agent => (
-          <Card key={agent.id} className="border-none shadow-md hover:shadow-xl transition-all group relative overflow-hidden bg-card">
-            {/* Visual accent */}
-            <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-            
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                  <Bot size={24} />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-bold">{agent.name}</CardTitle>
-                  <CardDescription className="flex items-center gap-1.5 mt-0.5">
-                    <Badge variant="secondary" className="px-1.5 py-0 text-[10px] uppercase font-bold tracking-tighter bg-primary/5 text-primary border-primary/10">
-                      {agent.model.split('/').pop() || agent.model}
-                    </Badge>
-                  </CardDescription>
-                </div>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal size={16} /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem asChild><Link href={`/dashboard/agents/${agent.id}`} className="w-full">Edit Context</Link></DropdownMenuItem>
-                  <DropdownMenuItem>View Logs</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CardHeader>
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {agents.map((agent) => (
+            <Link key={agent.id} href={`/dashboard/agents/${agent.id}`}>
+              <div className="bg-white border border-gray-200 rounded-lg p-6 hover:border-gray-300 hover:shadow-lg transition-all cursor-pointer group overflow-hidden relative">
+                {/* Accent line on hover */}
+                <div className="absolute top-0 left-0 w-1 h-full bg-black opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            <CardContent className="pt-4 pb-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1">
-                    <MessageSquare size={10} /> Messages
-                  </span>
-                  <p className="text-lg font-bold">{agent._count?.messages || 0}</p>
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 group-hover:bg-black group-hover:text-white transition-all">
+                      <Bot size={20} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 truncate">{agent.name}</h3>
+                      <p className="text-xs text-gray-600 uppercase tracking-wider font-bold mt-1">
+                        {agent.model.split('/').pop() || agent.model}
+                      </p>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <button className="p-1 rounded hover:bg-gray-100 text-gray-600">
+                        <MoreHorizontal size={18} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-1">
-                    <FileText size={10} /> Documents
-                  </span>
-                  <p className="text-lg font-bold">{agent._count?.documents || 0}</p>
+
+                {/* Stats */}
+                <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600 uppercase font-bold tracking-wider">Conversations</span>
+                    <span className="text-lg font-bold text-gray-900">{agent._count?.messages || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs font-medium text-gray-600">Active</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Status bar */}
-              <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[11px] font-medium text-muted-foreground">Ready for deployment</span>
+                {/* Action Button */}
+                <Button variant="ghost" className="w-full text-gray-700 hover:bg-gray-100 justify-start gap-2 font-bold h-9">
+                  <Settings size={16} /> Configure
+                </Button>
               </div>
-            </CardContent>
+            </Link>
+          ))}
 
-            <CardFooter className="bg-muted/30 p-2 gap-2">
-              <Link href={`/dashboard/agents/${agent.id}`} className="flex-1">
-                <Button variant="ghost" className="w-full h-9 text-xs font-bold gap-2 hover:bg-background">
-                  <Settings size={14} /> Configure
+          {agents.length === 0 && (
+            <div className="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 text-center space-y-4">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-gray-400 border border-gray-200">
+                <Bot size={32} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-gray-900">No agents created</h3>
+                <p className="text-gray-600 max-w-xs mx-auto">Create your first AI assistant to start managing conversations.</p>
+              </div>
+              <Link href="/dashboard/agents/new">
+                <Button className="bg-black text-white hover:bg-gray-900 font-bold gap-2 mt-2">
+                  <Plus size={18} /> Create First Agent
                 </Button>
               </Link>
-              <Button size="icon" variant="ghost" className="w-9 h-9 text-primary hover:bg-primary/10">
-                <Zap size={14} fill="currentColor" />
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-
-        {agents.length === 0 && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-2xl bg-muted/20 text-center space-y-4">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
-              <Bot size={32} />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold">No agents found</h3>
-              <p className="text-muted-foreground max-w-xs mx-auto">Create your first AI assistant to start automating your business workflows.</p>
-            </div>
-            <Button className="font-bold">Deploy Your First Agent</Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

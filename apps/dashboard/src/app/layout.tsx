@@ -12,7 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import Link from "next/link";
+export const metadata: Metadata = {
+  title: "ElevenLabs - AI Voice Agents Platform",
+  description: "Build and deploy AI voice agents for your business",
+};
 
 export default function RootLayout({
   children,
@@ -24,8 +27,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex">
-        <main className="flex-1 overflow-y-auto bg-background/50">
+      <body className="min-h-full bg-white text-gray-900">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </body>
