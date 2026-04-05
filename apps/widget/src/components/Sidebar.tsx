@@ -1,55 +1,54 @@
-import { Home, Bot, Database, Settings, MessageSquare, Users, CheckSquare, Phone, MessageCircle, Send, HelpCircle, LogOut, ChevronDown, Zap, Puzzle } from 'lucide-react';
+interface SidebarProps {
+  activePage: string;
+  onPageChange: (page: string) => void;
+}
 
-export function Sidebar() {
+export default function Sidebar({ activePage, onPageChange }: SidebarProps) {
   return (
-    <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
+    <aside style={{ width: '256px', borderRight: '1px solid #e5e7eb', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 space-y-4">
-        <h1 className="text-lg font-bold text-gray-900">IIElevenLabs</h1>
-        <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-300 text-sm font-medium text-gray-900">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+      <div style={{ padding: '16px', borderBottom: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827', margin: 0 }}>IIElevenLabs</h1>
+        <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #d1d5db', fontSize: '14px', fontWeight: '500', color: '#111827', cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e' }} />
             <span>ElevenAgents</span>
           </div>
-          <ChevronDown size={16} />
+          <span>▼</span>
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
-        {/* Home */}
-        <NavItem icon={Home} label="Home" href="#" />
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '16px 8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <NavItem label="Home" />
 
-        {/* Configure Section */}
         <NavSection title="Configure">
-          <NavItem icon={Bot} label="Agents" href="#" />
-          <NavItem icon={Database} label="Knowledge Base" href="#" />
-          <NavItem icon={Zap} label="Tools" href="#" />
-          <NavItem icon={Puzzle} label="Integrations" href="#" badge="Alpha" />
-          <NavItem icon={Settings} label="Voices" href="#" />
+          <NavItem label="Agents" />
+          <NavItem label="Knowledge Base" />
+          <NavItem label="Tools" />
+          <NavItem label="Integrations" badge="Alpha" />
+          <NavItem label="Voices" />
         </NavSection>
 
-        {/* Monitor Section */}
         <NavSection title="Monitor">
-          <NavItem icon={MessageSquare} label="Conversations" href="#" />
-          <NavItem icon={Users} label="Users" href="#" />
-          <NavItem icon={CheckSquare} label="Tests" href="#" />
+          <NavItem label="Conversations" />
+          <NavItem label="Users" />
+          <NavItem label="Tests" />
         </NavSection>
 
-        {/* Deploy Section */}
         <NavSection title="Deploy">
-          <NavItem icon={Phone} label="Phone Numbers" href="#" />
-          <NavItem icon={MessageCircle} label="WhatsApp" href="#" />
-          <NavItem icon={Send} label="Outbound" href="#" />
+          <NavItem label="Phone Numbers" />
+          <NavItem label="WhatsApp" />
+          <NavItem label="Outbound" />
         </NavSection>
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-gray-200 space-y-2">
-        <NavItem icon={HelpCircle} label="Help" href="#" />
-        <NavItem icon={Settings} label="Settings" href="#" />
-        <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-          <LogOut size={20} />
+      <div style={{ padding: '12px', borderTop: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <NavItem label="Help" />
+        <NavItem label="Settings" />
+        <button style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px', fontSize: '14px', fontWeight: '500', color: '#dc2626', backgroundColor: 'transparent', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+          <span>🚪</span>
           <span>Logout</span>
         </button>
       </div>
@@ -59,24 +58,21 @@ export function Sidebar() {
 
 function NavSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="py-2">
-      <h3 className="px-3 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
-      <div className="space-y-1">{children}</div>
+    <div style={{ paddingY: '8px' }}>
+      <h3 style={{ padding: '8px 12px', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{title}</h3>
+      <div>{children}</div>
     </div>
   );
 }
 
-function NavItem({ icon: Icon, label, href, badge }: { icon: any; label: string; href: string; badge?: string }) {
+function NavItem({ label, badge }: { label: string; badge?: string }) {
   return (
-    <a
-      href={href}
-      className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-900 hover:bg-gray-100 transition-colors"
-    >
-      <div className="flex items-center gap-3 flex-1">
-        <Icon size={20} className="text-gray-600" />
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '8px 12px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', color: '#111827', cursor: 'pointer', backgroundColor: 'transparent', border: 'none', width: '100%', transition: 'background-color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+        <span style={{ width: '20px', height: '20px', color: '#4b5563' }}>•</span>
         <span>{label}</span>
       </div>
-      {badge && <span className="text-[10px] font-bold bg-gray-900 text-white px-1.5 py-0.5 rounded">{badge}</span>}
-    </a>
+      {badge && <span style={{ fontSize: '10px', fontWeight: 'bold', backgroundColor: '#1f2937', color: '#ffffff', padding: '2px 6px', borderRadius: '4px' }}>{badge}</span>}
+    </div>
   );
 }

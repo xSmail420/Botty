@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Copy2, HelpCircle, Phone } from 'lucide-react';
 
-export function WidgetConfig() {
+export default function WidgetConfig() {
   const [toggles, setToggles] = useState({
     feedback: true,
     chatMode: true,

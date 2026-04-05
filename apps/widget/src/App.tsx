@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import './App.css';
-import { Sidebar } from './components/Sidebar';
-import { WidgetConfig } from './pages/WidgetConfig';
+import Sidebar from './components/Sidebar';
+import WidgetConfig from './pages/WidgetConfig';
 
 export default function App() {
+  const [activePage, setActivePage] = useState('dashboard');
+
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar />
-      <main className="flex-1 flex flex-col min-w-0">
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
+      <Sidebar activePage={activePage} onPageChange={setActivePage} />
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <WidgetConfig />
       </main>
     </div>
