@@ -69,6 +69,18 @@ export default function ProvidersPage() {
     }
   };
 
+  const handleDeleteProvider = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this provider?')) return;
+    try {
+      // Assuming a DELETE /api/providers/:id endpoint should exist. 
+      // I should check index.ts if I added it.
+      await fetch(`/api/providers/${id}`, { method: 'DELETE' });
+      setProviders(providers.filter(p => p.id !== id));
+    } catch (err) {
+      console.error("Failed to delete provider", err);
+    }
+  };
+
   if (loading) return <div className="p-8 flex items-center gap-2 text-muted-foreground"><Loader2 className="animate-spin" /> Loading providers...</div>;
 
   return (
@@ -144,7 +156,7 @@ export default function ProvidersPage() {
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground"><MoreVertical size={16} /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteProvider(provider.id)}>Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardHeader>

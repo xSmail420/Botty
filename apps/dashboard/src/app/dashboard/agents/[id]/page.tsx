@@ -10,6 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
 import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog';
+import { 
   Bot, 
   ArrowLeft,
   FileText,
@@ -22,8 +31,9 @@ import {
   Settings,
   Plus,
   Copy,
-  Copy2,
-  Radio
+  CopyCheck,
+  Radio,
+  Loader2
 } from "lucide-react";
 import Link from 'next/link';
 
@@ -58,6 +68,63 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params);
   const [agent, setAgent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('agent');
+  const [isSaving, setIsSaving] = useState(false);
+  const [docs, setDocs] = useState<any[]>([]);
+  const [isIngesting, setIsIngesting] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'knowledge') {
+      fetch(`/api/rag/documents?agentId=${id}`)
+        .then(res => res.json())
+        .then(data => setDocs(Array.isArray(data) ? data : []));
+    }
+  }, [activeTab, id]);
+
+  const handleIngest = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsIngesting(true);
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      agentId: id,
+      title: formData.get('title'),
+      content: formData.get('content'),
+      sourceUrl: formData.get('sourceUrl'),
+    };
+
+    try {
+      const res = await fetch('/api/rag/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const newDoc = await res.json();
+      if (newDoc.id) {
+        setDocs(prev => [...prev, newDoc]);
+      }
+      (e.target as any).reset();
+    } finally {
+      setIsIngesting(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await fetch(`/api/agents/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: agent.name,
+          persona: agent.persona,
+          model: agent.model
+        })
+      });
+    } catch (err) {
+      console.error("Failed to save agent", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     fetch(`/api/agents/${id}`)
@@ -93,13 +160,20 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
             <Link href="/dashboard/agents" className="text-gray-600 hover:text-gray-900">
               <ArrowLeft size={20} />
             </Link>
-            <h1 className="text-xl font-bold text-gray-900">{agent.name}</h1>
+            <Input 
+              value={agent.name || ''} 
+              onChange={(e) => setAgent({ ...agent, name: e.target.value })}
+              className="text-xl font-bold text-gray-900 max-w-[300px] border-transparent hover:border-gray-300 focus:border-black px-2 h-auto py-1 shadow-none"
+            />
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" className="text-gray-700">Public</Button>
             <Button variant="outline" size="sm" className="text-gray-700">Variables</Button>
             <Button variant="outline" size="sm" className="text-gray-700">Enable Versioning</Button>
-            <Button size="sm" className="bg-black text-white hover:bg-gray-900">Preview</Button>
+            <Button size="sm" onClick={handleSave} disabled={isSaving} className="bg-black text-white hover:bg-gray-900">
+              {isSaving ? 'Saving...' : 'Save'}
+            </Button>
+            <Button size="sm" className="bg-white text-black border border-gray-200 hover:bg-gray-50">Preview</Button>
             <button className="p-2 hover:bg-gray-100 rounded">
               <Settings size={20} className="text-gray-600" />
             </button>
@@ -137,7 +211,8 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
                         <span className="text-sm text-gray-600 underline">Type {'{{'} to add variables</span>
                       </div>
                       <Textarea 
-                        defaultValue="#Personality&#10;You are Sam, the front desk receptionist at a mid-size company..."
+                        value={agent.persona || ''}
+                        onChange={(e) => setAgent({ ...agent, persona: e.target.value })}
                         className="min-h-[200px] border-gray-300 bg-white text-gray-900"
                       />
                     </div>
@@ -200,7 +275,7 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
                       Select which provider and model to use for the LLM.
                     </p>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
-                      <span className="font-medium">Qwen3-32B-A3B</span>
+                      <span className="font-medium">{agent.model || 'gpt-4o'}</span>
                       <ChevronRight size={16} />
                     </div>
                   </div>
@@ -220,10 +295,71 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
 
           {/* Knowledge Base Tab */}
           {activeTab === 'knowledge' && (
-            <div className="text-center py-12">
-              <FileText size={48} className="mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-bold text-gray-900">Knowledge Base</h3>
-              <p className="text-gray-600">Connect your knowledge sources here</p>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Knowledge Base</h2>
+                  <p className="text-gray-600">These documents are used to ground the agent's responses.</p>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-black text-white hover:bg-gray-900 gap-2 font-bold">
+                      <Plus size={18} /> Add Document
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <form onSubmit={handleIngest}>
+                      <DialogHeader>
+                        <DialogTitle>Add Document</DialogTitle>
+                        <DialogDescription>Ingest new text data into this agent's knowledge base.</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="title">Document Title</Label>
+                          <Input id="title" name="title" placeholder="Context Reference" required />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="sourceUrl">Source URL (Optional)</Label>
+                          <Input id="sourceUrl" name="sourceUrl" placeholder="https://..." />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="content">Content</Label>
+                          <Textarea id="content" name="content" placeholder="Paste data here..." className="min-h-[200px]" required />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" disabled={isIngesting}>
+                          {isIngesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Ingest
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {docs.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-white hover:shadow-sm transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-50 rounded flex items-center justify-center text-gray-500">
+                        <FileText size={20} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{doc.title}</p>
+                        <p className="text-xs text-gray-400">Added {new Date(doc.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 uppercase text-[10px] font-bold">Indexed</Badge>
+                  </div>
+                ))}
+                {docs.length === 0 && (
+                  <div className="py-20 text-center border-2 border-dashed border-gray-200 rounded-xl">
+                    <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500 font-medium">No documents connected yet.</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -300,7 +436,7 @@ export default function AgentDetailPage({ params }: { params: Promise<{ id: stri
                     &lt;elevenlabs-convai agent-id=&quot;agent_061kfab5b6fma91d7vqpy1&quot;&gt;&lt;/elevenlabs-convai&gt;
                   </div>
                   <Button variant="outline" className="gap-2" size="sm">
-                    <Copy2 size={16} />
+                    <CopyCheck  size={16} />
                     Copy
                   </Button>
                 </div>

@@ -20,16 +20,28 @@ export default function AgentsPage() {
   useEffect(() => {
     fetch(`/api/agents?tenantId=${tenantId}`)
       .then(res => res.json())
-      .then(data => setAgents(data))
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAgents(data);
+        } else {
+          setAgents([]);
+        }
+      })
       .catch(err => {
-        // Set mock data for demonstration
-        setAgents([
-          { id: '1', name: 'Front Desk Receptionist', model: 'gpt-4', _count: { messages: 234, documents: 5 } },
-          { id: '2', name: 'Customer Support Bot', model: 'gpt-4', _count: { messages: 156, documents: 3 } },
-          { id: '3', name: 'Sales Assistant', model: 'claude-3', _count: { messages: 89, documents: 2 } },
-        ]);
+        console.error("Failed to fetch agents", err);
+        setAgents([]);
       });
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this agent?')) return;
+    try {
+      await fetch(`/api/agents/${id}`, { method: 'DELETE' });
+      setAgents(agents.filter(a => a.id !== id));
+    } catch (err) {
+      console.error("Failed to delete agent", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -84,7 +96,7 @@ export default function AgentsPage() {
                     <DropdownMenuContent align="end" className="w-40">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(agent.id)}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

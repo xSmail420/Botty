@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElevenLabs - AI Voice Agents Platform",
-  description: "Build and deploy AI voice agents for your business",
+  title: "Botty AI - Advanced Agentic Layer",
+  description: "Build and deploy autonomous AI agents for your business with RAG and multi-provider support.",
 };
 
 export default function RootLayout({

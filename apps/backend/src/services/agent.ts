@@ -6,7 +6,10 @@ export class AgentService {
       where: { tenantId },
       include: {
         knowledgeBases: {
-          include: { _count: { select: { documents: true } } }
+          include: { 
+            documents: true,
+            _count: { select: { documents: true } } 
+          }
         }
       }
     });

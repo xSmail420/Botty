@@ -30,7 +30,8 @@ import {
   LogOut,
   ChevronDown,
   Zap,
-  Puzzle
+  Puzzle,
+  CreditCard
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -41,15 +42,16 @@ const AppSidebar = () => {
       <SidebarHeader className="p-4 border-b border-border/30">
         <div className="space-y-4">
           {/* Logo */}
-          <Link href="/dashboard" className="text-lg font-bold text-black">
-            IIElevenLabs
+          <Link href="/dashboard" className="text-xl font-bold text-black tracking-tight flex items-center gap-2">
+            <Bot className="text-primary" size={24} />
+            Botty AI
           </Link>
           
           {/* Workspace Selector */}
           <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 border border-border/50 text-sm font-medium">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <span>ElevenAgents</span>
+              <span>Standard Workspace</span>
             </div>
             <ChevronDown size={16} />
           </button>
@@ -82,6 +84,7 @@ const AppSidebar = () => {
               {[
                 { title: 'Agents', icon: Bot, url: '/dashboard/agents' },
                 { title: 'Knowledge Base', icon: Database, url: '/dashboard/knowledge' },
+                { title: 'Providers', icon: Settings, url: '/dashboard/providers' },
                 { title: 'Tools', icon: Zap, url: '/dashboard/tools' },
                 { title: 'Integrations', icon: Puzzle, url: '/dashboard/integrations', badge: 'Alpha' },
               ].map((item) => (
@@ -169,6 +172,14 @@ const AppSidebar = () => {
               <Link href="/dashboard/help" className="gap-3">
                 <HelpCircle size={20} className="text-gray-600" />
                 <span className="text-sm font-medium text-gray-900">Help</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="h-10">
+              <Link href="/dashboard/billing" className="gap-3">
+                <CreditCard size={20} className="text-gray-600" />
+                <span className="text-sm font-medium text-gray-900">Billing</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

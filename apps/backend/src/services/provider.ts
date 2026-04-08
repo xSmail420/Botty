@@ -56,4 +56,12 @@ export class ProviderService {
       },
     });
   }
+  /**
+   * Delete a provider configuration.
+   */
+  static async deleteProvider(id: string) {
+    return prisma.aIProvider.delete({
+      where: { id },
+    });
+  }
 }
