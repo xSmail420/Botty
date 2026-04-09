@@ -7,6 +7,9 @@ dotenv.config({ path: path.join(__dirname, '.env') })
 
 export default defineConfig({
   schema: path.join('prisma', 'schema.prisma'),
+  datasource: {
+    url: process.env.DATABASE_URL!
+  },
   migrate: {
     adapter: () => {
       const connectionString = process.env.DATABASE_URL!
