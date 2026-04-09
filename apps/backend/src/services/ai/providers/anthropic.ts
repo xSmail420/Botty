@@ -17,8 +17,8 @@ export class AnthropicProvider extends BaseProvider {
         },
         body: JSON.stringify({
           model: config.modelId,
-          messages: messages.filter(m => m.role !== 'system'),
-          system: messages.find(m => m.role === 'system')?.content,
+          messages: messages.filter((m: any) => m.role !== 'system'),
+          system: messages.find((m: any) => m.role === 'system')?.content,
           max_tokens: maxTokens || 1024,
           temperature,
         }),
@@ -56,8 +56,8 @@ export class AnthropicProvider extends BaseProvider {
       },
       body: JSON.stringify({
         model: config.modelId,
-        messages: messages.filter(m => m.role !== 'system'),
-        system: messages.find(m => m.role === 'system')?.content,
+        messages: messages.filter((m: any) => m.role !== 'system'),
+        system: messages.find((m: any) => m.role === 'system')?.content,
         max_tokens: maxTokens || 1024,
         temperature,
         stream: true,

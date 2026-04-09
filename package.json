@@ -12,5 +12,10 @@
     "eslint": "latest",
     "typescript": "latest"
   },
-  "packageManager": "pnpm@10.14.0"
+  "packageManager": "pnpm@10.14.0",
+  "pnpm": {
+    "overrides": {
+      "react-hook-form": "^7.72.1"
+    }
+  }
 }

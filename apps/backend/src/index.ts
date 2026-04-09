@@ -11,6 +11,10 @@ import { ProviderFactory } from './services/ai/factory';
 import { ModelConfig } from '@botty/shared';
 import { prisma } from './services/prisma';
 
+import { AnalyticsService } from './services/analytics';
+import { IngestionService } from './services/ingestion';
+import { OrchestrationService } from './services/orchestration';
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -19,6 +23,27 @@ const port = process.env.PORT || 3001;
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '0.1.0' });
+});
+
+// Analytics API
+app.get('/api/analytics/status', async (req, res) => {
+  try {
+    const { tenantId } = req.query;
+    const stats = await AnalyticsService.getStats(tenantId as string);
+    res.json(stats);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/analytics/logs', async (req, res) => {
+  try {
+    const { tenantId, limit } = req.query;
+    const logs = await AnalyticsService.listLogs(tenantId as string, limit ? parseInt(limit as string) : 50);
+    res.json(logs);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Providers API
@@ -44,17 +69,7 @@ app.post('/api/providers', async (req, res) => {
   }
 });
 
-app.delete('/api/providers/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await ProviderService.deleteProvider(id);
-    res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Existing Routes
+// Agents API
 app.get('/api/agents', async (req, res) => {
   try {
     const { tenantId } = req.query;
@@ -87,39 +102,24 @@ app.post('/api/agents', async (req, res) => {
 
 app.put('/api/agents/:id', async (req, res) => {
   try {
-    const { name, persona, model } = req.body;
-    const agent = await AgentService.updateAgent(req.params.id, { name, persona, model });
+    const { name, persona, model, traits, widgetConfig, ragConfig } = req.body;
+    const agent = await prisma.agent.update({
+      where: { id: req.params.id },
+      data: { name, persona, model, traits, widgetConfig, ragConfig }
+    });
     res.json(agent);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.delete('/api/agents/:id', async (req, res) => {
-  try {
-    await AgentService.deleteAgent(req.params.id);
-    res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
+// Knowledge API
 app.get('/api/rag/documents', async (req, res) => {
   try {
-    const { tenantId, agentId } = req.query;
-    // If agentId is provided, list for that agent. Else list for all agents of the tenant.
-    let documents;
-    if (agentId) {
-      const agent = await AgentService.getAgent(agentId as string);
-      documents = agent?.knowledgeBases.flatMap(kb => kb.documents) || [];
-    } else if (tenantId) {
-      const agents = await AgentService.listAgents(tenantId as string);
-      documents = agents.flatMap(agent => 
-        agent.knowledgeBases.flatMap(kb => kb.documents)
-      );
-    } else {
-      return res.status(400).json({ error: 'tenantId or agentId is required' });
-    }
+    const { agentId } = req.query;
+    if (!agentId) return res.status(400).json({ error: 'agentId is required' });
+    const agent = await AgentService.getAgent(agentId as string);
+    const documents = agent?.knowledgeBases.flatMap((kb: any) => kb.documents) || [];
     res.json(documents);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -128,21 +128,9 @@ app.get('/api/rag/documents', async (req, res) => {
 
 app.post('/api/rag/ingest', async (req, res) => {
   try {
-    const { agentId, title, content, sourceUrl } = req.body;
-    const agent = await AgentService.getAgent(agentId);
-    if (!agent) return res.status(404).json({ error: 'Agent not found' });
-
-    // Ensure agent has at least one KB
-    let kb = agent.knowledgeBases[0];
-    if (!kb) {
-      kb = await prisma.knowledgeBase.create({
-        data: { name: 'Default Knowledge Base', agentId },
-        include: { documents: true }
-      }) as any;
-    }
-
-    const doc = await RAGService.ingestDocument(kb.id, title, content, sourceUrl);
-    res.json(doc || { message: 'Document already exists in this Knowledge Base' });
+    const { agentId, title, content, sourceUrl, type } = req.body;
+    const result = await IngestionService.ingest(agentId, { title, content, sourceUrl, type });
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -150,36 +138,9 @@ app.post('/api/rag/ingest', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { messages, agentId } = req.body;
-    const agent = await AgentService.getAgent(agentId);
-    if (!agent) return res.status(404).json({ error: 'Agent not found' });
-
-    // Extract provider from model string (e.g. "openai/gpt-4o")
-    const [providerType, modelId] = agent.model.includes('/') 
-      ? agent.model.split('/') 
-      : ['openai', agent.model];
-
-    // NEW: Fetch provider config from DB instead of process.env!
-    const dbProvider = await ProviderService.getProvider(agent.tenantId, providerType);
-    
-    const config: ModelConfig = {
-      provider: providerType as any,
-      modelId: modelId || agent.model,
-      apiKey: dbProvider?.apiKey || 
-              process.env[`${providerType.toUpperCase()}_API_KEY`] || 
-              process.env[`${providerType.toUpperCase()}_AUTH_TOKEN`] || '',
-      baseUrl: dbProvider?.baseUrl || 
-               process.env[`${providerType.toUpperCase()}_BASE_URL`],
-    };
-
-    const provider = ProviderFactory.getProvider(config.provider);
-    const response = await provider.complete({
-      messages,
-      config,
-      temperature: 0.7,
-    });
-    
-    res.json({ message: { role: 'assistant', content: response.content } });
+    const { messages, agentId, sessionId } = req.body;
+    const result = await OrchestrationService.chat(agentId, messages, sessionId || 'default-session');
+    res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -26,5 +26,32 @@ export const TenantSchema = z.object({
   stripeId: z.string().optional(),
 });
 
-export type Tenant = z.infer<typeof TenantSchema>;
+
 export * from './models';
+
+export type PagePath = "analytics" | "knowledge-base" | "brain" | "integrations" | "widget" | "persona" | "performance";
+
+export interface NavItem {
+  icon: string;
+  label: string;
+  path: PagePath;
+}
+
+export const NAV_ITEMS: NavItem[] = [
+  { icon: "agents", label: "Agents", path: "analytics" },
+  { icon: "library", label: "Library", path: "knowledge-base" },
+  { icon: "history", label: "History", path: "brain" },
+  { icon: "api-keys", label: "API Keys", path: "integrations" },
+  { icon: "usage", label: "Usage", path: "widget" },
+  { icon: "settings", label: "Settings", path: "persona" },
+];
+
+export const PAGE_TITLES: Record<PagePath, string> = {
+  analytics: "Analytics & Observability",
+  "knowledge-base": "Knowledge Base",
+  brain: "Brain Configuration",
+  integrations: "Tools & Integrations",
+  widget: "Widget Customizer",
+  persona: "Persona & Behavior",
+  performance: "Performance Metrics",
+};

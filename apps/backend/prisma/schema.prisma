@@ -37,6 +37,12 @@ model Agent {
   persona        String          @db.Text
   avatar         String?
   model          String          @default("gpt-4o")
+  
+  // New configuration fields
+  traits         Json?           // { conciseness, density, strictness }
+  widgetConfig   Json?           // { primaryColor, accentColor, title, ctaLabel, avatarUrl }
+  ragConfig      Json?           // { chunkSize, overlap, hybridSearch, rerank }
+  
   tenantId       String
   tenant         Tenant          @relation(fields: [tenantId], references: [id])
   knowledgeBases KnowledgeBase[]
@@ -71,6 +77,10 @@ model Message {
   id        String   @id @default(uuid())
   role      String   // 'user' | 'assistant' | 'system'
   content   String   @db.Text
+  
+  // New tracking fields
+  metadata   Json?    // { latency, tokens, model, trace }
+  
   agentId   String
   agent     Agent    @relation(fields: [agentId], references: [id])
   sessionId String

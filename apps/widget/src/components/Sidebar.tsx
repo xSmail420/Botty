@@ -58,7 +58,7 @@ export default function Sidebar({ activePage, onPageChange }: SidebarProps) {
 
 function NavSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ paddingY: '8px' }}>
+    <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
       <h3 style={{ padding: '8px 12px', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{title}</h3>
       <div>{children}</div>
     </div>

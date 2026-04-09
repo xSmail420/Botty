@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Copy as CopyIcon, Phone as PhoneIcon } from 'lucide-react';
 
 export default function WidgetConfig() {
   const [toggles, setToggles] = useState({
@@ -100,7 +101,7 @@ export default function WidgetConfig() {
                 onClick={copyToClipboard}
                 className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded"
               >
-                <Copy2 size={16} />
+                <CopyIcon size={16} />
                 Copy
               </button>
             </div>
@@ -187,7 +188,7 @@ export default function WidgetConfig() {
           <p className="text-sm font-medium text-gray-900">Need help?</p>
         </div>
         <button className="flex items-center justify-center w-16 h-16 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors">
-          <Phone size={24} />
+          <PhoneIcon size={24} />
         </button>
       </div>
     </div>

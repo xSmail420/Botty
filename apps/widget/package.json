@@ -9,8 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@botty/shared": "workspace:*",
+    "@botty/ui": "workspace:*",
+    "lucide-react": "^1.7.0",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/react": "latest",
